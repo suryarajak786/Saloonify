@@ -1,0 +1,176 @@
+// MySQL Schema & DDL Migration Definitions
+
+export const MYSQL_TABLE_DDL = `
+CREATE TABLE IF NOT EXISTS users (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  role VARCHAR(50) DEFAULT 'staff',
+  phone VARCHAR(50) DEFAULT '',
+  avatar TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS staff (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  phone VARCHAR(50) NOT NULL,
+  email VARCHAR(255) DEFAULT '',
+  role VARCHAR(100) NOT NULL,
+  specialties JSON,
+  commission_percentage DECIMAL(5,2) DEFAULT 0,
+  avatar TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  schedule JSON,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS customers (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  phone VARCHAR(50) NOT NULL UNIQUE,
+  email VARCHAR(255) DEFAULT '',
+  gender VARCHAR(20) DEFAULT 'female',
+  birthdate VARCHAR(20) DEFAULT '',
+  anniversary VARCHAR(20) DEFAULT '',
+  address TEXT,
+  notes TEXT,
+  preferences TEXT,
+  total_visits INT DEFAULT 0,
+  total_spent DECIMAL(12,2) DEFAULT 0,
+  last_visit_date VARCHAR(50) DEFAULT '',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS services (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  category VARCHAR(100) NOT NULL,
+  description TEXT,
+  price DECIMAL(10,2) NOT NULL,
+  duration_minutes INT NOT NULL,
+  tax_rate DECIMAL(5,2) DEFAULT 18,
+  is_active BOOLEAN DEFAULT TRUE,
+  gender_target VARCHAR(20) DEFAULT 'all',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS appointments (
+  id VARCHAR(64) PRIMARY KEY,
+  appointment_number VARCHAR(50) NOT NULL UNIQUE,
+  customer_id VARCHAR(64) NOT NULL,
+  customer_name VARCHAR(255) NOT NULL,
+  customer_phone VARCHAR(50) NOT NULL,
+  staff_id VARCHAR(64) NOT NULL,
+  staff_name VARCHAR(255) NOT NULL,
+  services JSON NOT NULL,
+  appointment_date VARCHAR(20) NOT NULL,
+  start_time VARCHAR(20) NOT NULL,
+  end_time VARCHAR(20) NOT NULL,
+  status VARCHAR(50) DEFAULT 'booked',
+  notes TEXT,
+  total_amount DECIMAL(10,2) DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS invoices (
+  id VARCHAR(64) PRIMARY KEY,
+  invoice_number VARCHAR(50) NOT NULL UNIQUE,
+  customer_id VARCHAR(64) NOT NULL,
+  customer_name VARCHAR(255) NOT NULL,
+  customer_phone VARCHAR(50) NOT NULL,
+  customer_address TEXT,
+  staff_id VARCHAR(64) DEFAULT '',
+  staff_name VARCHAR(255) DEFAULT '',
+  appointment_id VARCHAR(64) DEFAULT '',
+  date VARCHAR(50) NOT NULL,
+  items JSON NOT NULL,
+  subtotal DECIMAL(12,2) NOT NULL,
+  discount_amount DECIMAL(12,2) DEFAULT 0,
+  taxable_amount DECIMAL(12,2) NOT NULL,
+  cgst_total DECIMAL(12,2) DEFAULT 0,
+  sgst_total DECIMAL(12,2) DEFAULT 0,
+  total_tax DECIMAL(12,2) NOT NULL,
+  grand_total DECIMAL(12,2) NOT NULL,
+  round_off DECIMAL(6,2) DEFAULT 0,
+  payment_method VARCHAR(50) DEFAULT 'cash',
+  payment_status VARCHAR(50) DEFAULT 'paid',
+  paid_amount DECIMAL(12,2) DEFAULT 0,
+  due_amount DECIMAL(12,2) DEFAULT 0,
+  tax_mode VARCHAR(20) DEFAULT 'exclusive',
+  notes TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS products (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  sku VARCHAR(100) NOT NULL UNIQUE,
+  category VARCHAR(100) NOT NULL,
+  purchase_cost DECIMAL(10,2) NOT NULL,
+  selling_price DECIMAL(10,2) NOT NULL,
+  stock_quantity INT DEFAULT 0,
+  min_stock_threshold INT DEFAULT 5,
+  unit VARCHAR(50) DEFAULT 'pcs',
+  supplier VARCHAR(255) DEFAULT '',
+  tax_rate DECIMAL(5,2) DEFAULT 18,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS inventory_movements (
+  id VARCHAR(64) PRIMARY KEY,
+  product_id VARCHAR(64) NOT NULL,
+  product_name VARCHAR(255) NOT NULL,
+  type VARCHAR(50) NOT NULL,
+  quantity INT NOT NULL,
+  previous_stock INT NOT NULL,
+  new_stock INT NOT NULL,
+  date VARCHAR(50) NOT NULL,
+  performed_by VARCHAR(255) DEFAULT 'Admin',
+  notes TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS expenses (
+  id VARCHAR(64) PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  category VARCHAR(100) NOT NULL,
+  amount DECIMAL(12,2) NOT NULL,
+  date VARCHAR(20) NOT NULL,
+  payment_method VARCHAR(50) DEFAULT 'cash',
+  paid_to VARCHAR(255) DEFAULT '',
+  receipt_number VARCHAR(100) DEFAULT '',
+  notes TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS settings (
+  id VARCHAR(64) PRIMARY KEY,
+  salon_name VARCHAR(255) DEFAULT 'Saloonify Luxury Salon & Spa',
+  tagline VARCHAR(255) DEFAULT 'Style, Care & Elegance Redefined',
+  phone VARCHAR(50) DEFAULT '+91 98765 43210',
+  email VARCHAR(255) DEFAULT 'care@saloonify.in',
+  address TEXT,
+  city VARCHAR(100) DEFAULT 'Bengaluru',
+  state VARCHAR(100) DEFAULT 'Karnataka',
+  pincode VARCHAR(20) DEFAULT '560038',
+  gstin VARCHAR(50) DEFAULT '29ABCDE1234F1Z5',
+  default_gst_rate DECIMAL(5,2) DEFAULT 18,
+  tax_mode VARCHAR(20) DEFAULT 'exclusive',
+  currency_symbol VARCHAR(10) DEFAULT '₹',
+  invoice_prefix VARCHAR(20) DEFAULT 'INV',
+  invoice_footer TEXT,
+  terms_and_conditions TEXT,
+  operating_hours JSON,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+`;
